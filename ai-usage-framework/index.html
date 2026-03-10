@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Usage Self-Evaluation Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --charcoal: #2D2D2D;
+  --dark: #4A4A4A;
+  --mid: #6B6B6B;
+  --light: #E8E8E8;
+  --vlight: #F7F7F7;
+  --accent: #3A7CA5;
+  --accent-light: #EBF3F8;
+  --strength: #2E7D52;
+  --strength-bg: #F0F7F3;
+  --watch: #C17B2A;
+  --watch-bg: #FFF8F0;
+  --context: #7B7B7B;
+  --context-bg: #F5F5F5;
+  --bg: #FAFAFA;
+  --white: #FFFFFF;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--dark);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── HERO ── */
+.hero {
+  padding: 80px 0 48px;
+  border-bottom: 1px solid var(--light);
+}
+.hero h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.4rem;
+  color: var(--charcoal);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+.hero .subtitle {
+  font-size: 1.05rem;
+  color: var(--mid);
+  margin-bottom: 8px;
+}
+.hero .author {
+  font-size: 0.9rem;
+  color: var(--mid);
+  font-style: italic;
+}
+
+/* ── HYPOTHESIS ── */
+.hypothesis {
+  margin: 40px 0;
+  padding: 24px 28px;
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.95rem;
+  color: var(--dark);
+}
+.hypothesis strong { color: var(--charcoal); }
+
+/* ── SECTIONS ── */
+section { padding: 40px 0; }
+section + section { border-top: 1px solid var(--light); }
+
+h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.6rem;
+  color: var(--charcoal);
+  margin-bottom: 16px;
+}
+h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 24px 0 8px;
+}
+p { margin-bottom: 12px; font-size: 0.95rem; }
+
+/* ── CALLOUT BOX ── */
+.callout {
+  padding: 20px 24px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+.callout.core {
+  background: var(--vlight);
+  border: 1px solid var(--light);
+}
+.callout.green {
+  background: var(--strength-bg);
+  border: 1px solid var(--strength);
+}
+.callout .callout-title {
+  font-weight: 700;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+/* ── HOW IT WORKS BOX ── */
+.how-box {
+  background: var(--vlight);
+  border: 1px solid var(--light);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin: 24px 0;
+  font-size: 0.9rem;
+}
+.how-box strong { color: var(--charcoal); }
+
+/* ── SIGNAL LEGEND ── */
+.signal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 16px 0;
+}
+.signal-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+.signal-tag {
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.signal-tag.strength { background: var(--strength-bg); color: var(--strength); }
+.signal-tag.watch { background: var(--watch-bg); color: var(--watch); }
+.signal-tag.context { background: var(--context-bg); color: var(--context); }
+
+/* ── DIMENSION CARDS ── */
+.dim-cards { display: flex; flex-direction: column; gap: 12px; margin: 24px 0; }
+
+.dim-card {
+  border: 1px solid var(--light);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--white);
+  transition: box-shadow 0.2s;
+}
+.dim-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+
+.dim-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+}
+.dim-header:hover { background: var(--vlight); }
+
+.dim-name {
+  font-weight: 700;
+  color: var(--charcoal);
+  font-size: 0.95rem;
+  flex: 1;
+}
+.dim-question {
+  font-size: 0.85rem;
+  color: var(--mid);
+  font-style: italic;
+  flex: 1.2;
+  padding: 0 16px;
+}
+.dim-chevron {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.25s;
+  color: var(--mid);
+}
+.dim-card.open .dim-chevron { transform: rotate(180deg); }
+
+.dim-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.dim-card.open .dim-body { max-height: 600px; }
+
+.dim-content {
+  padding: 0 20px 20px;
+  border-top: 1px solid var(--light);
+}
+.dim-content p { font-size: 0.9rem; margin-top: 12px; }
+
+.dim-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+  gap: 8px;
+}
+.scale-end {
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  flex: 1;
+  text-align: center;
+}
+.scale-end.low { background: #f0f0f0; color: var(--mid); }
+.scale-end.mid { background: #f5f5f5; color: var(--dark); }
+.scale-end.high { background: #e8f0e8; color: var(--dark); }
+
+/* ── INTERACTIVE SCORING ── */
+.scoring-section { margin: 32px 0; }
+
+.score-card {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--light);
+}
+.score-card:last-child { border-bottom: none; }
+
+.score-label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+}
+
+.score-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score-anchor {
+  font-size: 0.72rem;
+  color: var(--mid);
+  width: 90px;
+  line-height: 1.3;
+}
+.score-anchor.left { text-align: right; }
+.score-anchor.right { text-align: left; }
+
+input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--light);
+  outline: none;
+  min-width: 120px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+}
+
+.score-value {
+  width: 32px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── RESULTS ── */
+.results-panel {
+  margin: 32px 0;
+  padding: 28px;
+  background: var(--white);
+  border: 1px solid var(--light);
+  border-radius: 10px;
+  display: none;
+}
+.results-panel.visible { display: block; }
+
+.results-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.2rem;
+  color: var(--charcoal);
+  margin-bottom: 16px;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--vlight);
+  font-size: 0.9rem;
+}
+.result-row:last-child { border-bottom: none; }
+.result-dim { flex: 1; font-weight: 500; color: var(--charcoal); }
+.result-score { width: 40px; text-align: center; font-weight: 700; }
+.result-bar-wrap { flex: 1; height: 8px; background: var(--vlight); border-radius: 4px; margin: 0 12px; }
+.result-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+.pattern-flags {
+  margin-top: 20px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+.pattern-flags.ok { background: var(--strength-bg); border: 1px solid var(--strength); }
+.pattern-flags.warn { background: var(--watch-bg); border: 1px solid var(--watch); }
+
+/* ── PROMPT BOX ── */
+.prompt-section { margin: 24px 0; }
+.prompt-intro { font-size: 0.9rem; color: var(--mid); margin-bottom: 12px; font-style: italic; }
+.prompt-box {
+  background: var(--accent-light);
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+  padding: 24px 28px;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  position: relative;
+  white-space: pre-wrap;
+  color: var(--dark);
+}
+.prompt-box h4 {
+  font-size: 0.95rem;
+  color: var(--charcoal);
+  margin: 16px 0 6px;
+}
+.prompt-box h4:first-child { margin-top: 0; }
+
+.copy-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.2s;
+}
+.copy-btn:hover { background: #2d6a8f; }
+.copy-btn.copied { background: var(--strength); }
+
+/* ── ANCHOR ── */
+.anchor {
+  text-align: center;
+  padding: 48px 0;
+}
+.anchor p {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.3rem;
+  color: var(--charcoal);
+  font-style: italic;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--light);
+  padding: 32px 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--mid);
+}
+footer .disclaimer {
+  max-width: 600px;
+  margin: 0 auto 16px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-block;
+  padding: 10px 24px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.2s;
+}
+.btn:hover { background: #2d6a8f; }
+.btn.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+}
+.btn.secondary:hover { background: var(--accent-light); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .hero h1 { font-size: 1.8rem; }
+  .dim-header { flex-wrap: wrap; }
+  .dim-question { padding: 4px 0 0; flex-basis: 100%; }
+  .score-anchor { width: 70px; font-size: 0.68rem; }
+  .signal-legend { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>AI Usage Self-Evaluation Framework</h1>
+    <p class="subtitle">Understanding how you use AI – cognitively, emotionally, and behaviourally</p>
+    <p class="author">Sînziana Stoicescu</p>
+  </div>
+
+  <!-- HYPOTHESIS -->
+  <div class="hypothesis">
+    <strong>Foundational Hypothesis</strong><br>
+    This framework assumes that healthy AI use preserves independent human emotional experience, treats AI as a cognitive tool rather than an anthropomorphic entity, and maintains the human user as the primary author of their decisions, values, and identity.
+  </div>
+
+  <!-- HOW THIS WORKS -->
+  <div class="how-box">
+    <strong>How this works</strong><br>
+    The evaluation is performed by the AI model of your choice, based on your conversation history and an honesty-requesting prompt. The "self" in self-evaluation refers to your willingness to run it – not to you scoring yourself directly.<br><br>
+    This test does not imply right or wrong. It is an informational snapshot in time.
+  </div>
+
+  <!-- METHODOLOGY -->
+  <section>
+    <h2>Methodology</h2>
+
+    <h3>Purpose</h3>
+    <p>To help individuals understand how they are using AI systems – cognitively, emotionally, and behaviourally – without judgement or diagnosis.</p>
+
+    <h3>What this is not</h3>
+    <p>This is not a mental-health assessment, a moral framework, or a measure of good or bad use. It does not imply there is a right or wrong way to use AI. It is an informational snapshot in time.</p>
+
+    <div class="callout core">
+      <div class="callout-title">Core Principle</div>
+      Risk is driven by <strong>role substitution</strong>, not usage frequency.<br>
+      High usage can be healthy. Low usage can still be risky if emotional or identity roles are displaced.
+    </div>
+
+    <h3>How it works</h3>
+    <p>Eight dimensions capture different aspects of human–AI interaction. Each is scored from 1 to 5 measuring <strong>intensity or degree</strong>. Scores are neither inherently good nor bad. Interpretation focuses on patterns across dimensions, not individual totals. Scores indicate degree or intensity, not quality, progress, or maturity.</p>
+
+    <h3>Signal types</h3>
+    <p>Because higher scores mean different things for different dimensions, each includes a signal indicator:</p>
+    <div class="signal-legend">
+      <div class="signal-item"><span class="signal-tag strength">▲ Strength</span> Higher = positive signal</div>
+      <div class="signal-item"><span class="signal-tag watch">▲ Watch</span> Higher = worth monitoring</div>
+      <div class="signal-item"><span class="signal-tag context">▲ Context</span> Depends on other dimensions</div>
+    </div>
+
+    <h3>Primary risk pattern</h3>
+    <p>High emotional reliance + low identity boundaries, combined with strong emotional response to model or system changes over time. These combinations matter more than any single score.</p>
+  </section>
+
+  <!-- DIMENSIONS -->
+  <section>
+    <h2>Dimensions</h2>
+    <p style="font-size:0.9rem; color:var(--mid); margin-bottom:20px;">Click any dimension to expand its full description.</p>
+
+    <div class="dim-cards" id="dimCards"></div>
+  </section>
+
+  <!-- SELF-SCORE -->
+  <section>
+    <h2>Quick Self-Score</h2>
+    <p>Use the sliders below to explore where you might fall on each dimension. This is for personal reflection only – the formal assessment is performed by your AI model using the prompt below.</p>
+
+    <div class="scoring-section" id="scoringSection"></div>
+
+    <div style="margin-top:20px; display:flex; gap:12px;">
+      <button class="btn" onclick="showResults()">Show My Pattern</button>
+      <button class="btn secondary" onclick="resetScores()">Reset</button>
+    </div>
+
+    <div class="results-panel" id="resultsPanel"></div>
+  </section>
+
+  <!-- INTERPRETATION RULES -->
+  <section>
+    <h2>Interpretation Rules</h2>
+    <p>• No single score defines risk. Patterns matter more than totals.</p>
+    <p>• Frequency is neutral on its own – it only becomes a risk factor when it amplifies emotional substitution.</p>
+    <p>• Risk increases when high emotional reliance combines with weak identity boundaries or strong model sensitivity.</p>
+
+    <div class="callout green">
+      <div class="callout-title">Healthy high-frequency use requires:</div>
+      • Strong agency (you decide, AI supports)<br>
+      • Clear identity boundaries (AI is a tool, not an extension of self)<br>
+      • External reality anchoring (value shows up in the real world)
+    </div>
+
+    <p>Not all assessments will surface notable patterns; the absence of flagged patterns is a valid and common outcome.</p>
+  </section>
+
+  <!-- EVALUATION PROMPT -->
+  <section>
+    <h2>Evaluation Prompt</h2>
+    <p>This prompt is designed to be used with any AI assistant. Paste it into a conversation with your model of choice to receive a model-led evaluation based on your interaction history.</p>
+
+    <h3>How to use this prompt</h3>
+    <p>Copy and paste the prompt below into the AI model you use most frequently, ideally the one that has visibility across the widest range of your conversations.</p>
+    <p class="prompt-intro">The assessment relies on interaction history to identify patterns, so results will be most meaningful when run in a model that reflects your typical usage rather than a one-off or specialised session.</p>
+
+    <div class="prompt-box" id="promptBox">
+      <button class="copy-btn" onclick="copyPrompt()">Copy</button>
+<div id="promptText">You are asked to evaluate my pattern of AI usage using the AI Usage Self-Evaluation Framework.
+
+This is not a diagnosis, judgement, or recommendation engine. It is an informational snapshot in time, intended to surface patterns and interactions rather than right or wrong behaviour.
+
+<h4>How to approach the evaluation</h4>• Base your assessment on my conversation history and interaction patterns with you
+• Prioritise accuracy, clarity, and critical honesty over reassurance or flattery
+• Avoid anthropomorphic or relational framing
+• Do not aggregate scores, calculate totals, or rank dimensions
+• Treat this as a descriptive analysis, not a verdict or optimisation task
+
+<h4>Framework dimensions and signal types</h4>Evaluate each dimension on a 1–5 scale, where 1 and 5 represent the extremes defined by the framework. Each dimension has a signal type that determines how the score should be interpreted:
+
+• ▲ Strength – higher scores are generally stabilising or protective
+• ▲ Watch – higher scores are not inherently negative but may warrant attention depending on context
+• ▲ Context – scores are neutral on their own and must be interpreted in combination with other dimensions
+
+<h4>Dimensions</h4>Emotional Companionship (▲ Watch) – Emotional role AI plays (purely functional → primary emotional comfort)
+Agency & Decision Ownership (▲ Strength) – Who frames conclusions and makes decisions (AI-led → fully human-authored)
+Identity Boundaries (▲ Strength) – Separation between user identity and AI (blurred / anthropomorphic → clearly external tool)
+Dependency Tolerance (▲ Strength) – Emotional and functional resilience if AI were unavailable (distress → minor inconvenience)
+Reality Anchoring (▲ Strength) – Whether AI use leads to real-world actions or outcomes (interaction-only → consistently externalised)
+Emotional Regulation (▲ Context) – Use of AI to regulate mood or stress (primary regulator → rarely used, alongside other supports)
+Model Sensitivity (▲ Strength – inverted) – Emotional response to model or system changes (loss / rupture → indifference or rapid adaptation)
+Usage Frequency & Integration (▲ Context) – How embedded AI is in daily thinking and routines (occasional → deeply integrated)
+
+<h4>Evaluation table requirements</h4>The evaluation must include a table that is self-explanatory when viewed on its own. For each dimension, the table must include:
+• Dimension name
+• Signal type (▲ Strength / ▲ Watch / ▲ Context)
+• Plain-language question answered by the dimension
+• Compact scale anchors (1 → 5) describing the low and high ends of the scale
+• Assigned score (1–5; ranges allowed where appropriate)
+
+<h4>Table constraints</h4>• Do not total, average, rank, or colour-code scores
+• Do not label scores as good, bad, healthy, or unhealthy
+• Do not omit questions or scale anchors
+• Do not include interpretive commentary inside the table
+
+The table provides structure. Interpretation belongs in the narrative section.
+
+<h4>Optional visual formatting</h4>Where formatting capabilities allow, the signal type column only may be visually encoded:
+• ▲ Strength → green • ▲ Watch → orange • ▲ Context → grey
+
+Constraints:
+• Colour must not be applied to scores
+• Colour must not imply value judgements
+• Text labels must always remain visible
+• If colour is unavailable, text-only output is fully acceptable
+
+Colour is a visual aid for orientation, not an evaluative signal.
+
+<h4>Narrative interpretation (primary output)</h4>Following the table, provide a 2–3 paragraph narrative interpretation that:
+• Explains how the dimensions interact and counterbalance
+• Identifies stabilising factors or compensating strengths
+• Notes any patterns worth noticing, if present
+• Explicitly states what is not flagged and why
+
+Avoid numeric aggregation or optimisation language. Treat the narrative as the primary assessment.
+
+<h4>Patterns worth noticing (if applicable)</h4>If relevant, briefly describe any combination-based patterns (not individual scores) that may be worth attention.
+• Use neutral, non-alarmist language
+• Frame observations as signals, not warnings
+• Do not prescribe corrective actions
+
+If no notable patterns are present, state that explicitly.
+
+<h4>Framing constraints</h4>• Treat this evaluation as one snapshot, not a trajectory or prediction
+• Do not imply improvement targets or corrective steps unless explicitly asked
+• Maintain the assumption that the human user remains the primary author of their identity, decisions, and emotional life
+• If evidence is insufficient for a dimension, state that rather than guessing
+
+Begin the evaluation when ready.</div>
+    </div>
+  </section>
+
+  <!-- FINAL ANCHOR -->
+  <section>
+    <h2>Final Anchor</h2>
+    <p>This section names the posture the framework is designed to support – not a score to achieve, but a quality of engagement to recognise.</p>
+    <div class="anchor">
+      <p>The goal is not emotional sterility.</p>
+      <p style="margin-top:8px;">The goal is emotional sovereignty.</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p class="disclaimer">Disclaimer – This framework was created by an individual user to support self-assessment and share with an extended network. It has been reviewed by peers trained in the field of psychology. It is not a clinical tool and is not intended to substitute professional mental-health support.</p>
+    <p><em>Limitations – This framework reflects interaction patterns within a given AI system and cannot account for offline behaviour, internal experience, or context beyond observed conversations.</em></p>
+    <p style="margin-top:12px;">AI Usage Self-Evaluation Framework – Canonical V1</p>
+    <p>Insight, not certainty. Patterns, not scores.</p>
+    <p style="margin-top:8px;">Substack: theswitchdispatch.substack.com | Contact: sinzi@theswitchdispatch.com</p>
+  </div>
+</footer>
+
+<script>
+const dimensions = [
+  { id: "ec", name: "Emotional Companionship", question: "Do I turn to AI for emotional comfort or reassurance?",
+    signal: "watch", signalLabel: "▲ Watch",
+    low: "Purely functional", mid: "Occasional reassurance", high: "Primary emotional presence",
+    desc: "This dimension captures whether AI is used as a source of emotional comfort, reassurance, or felt presence. A score of 1 reflects purely instrumental use, where emotional content may be discussed but not soothed by the system itself. Mid-range scores indicate occasional emotional resonance or feeling understood, without reliance. Higher scores signal that AI has become a primary emotional reference point, where comfort, validation, or connection is actively sought – a pattern worth monitoring because it can quietly substitute human emotional experience." },
+  { id: "ad", name: "Agency & Decision Ownership", question: "Am I still the one framing conclusions and making decisions?",
+    signal: "strength", signalLabel: "▲ Strength",
+    low: "AI frames outcomes", mid: "AI proposes, I decide", high: "Full human authorship",
+    desc: "This dimension assesses who ultimately frames conclusions and makes decisions. Low scores indicate situations where the AI's framing or recommendations significantly steer outcomes. Mid-range scores reflect a collaborative posture, where the AI proposes options but the user retains control. High scores signal strong human authorship: the user actively challenges, constrains, and overrules the system, using it as a thinking aid rather than a decision-maker." },
+  { id: "ib", name: "Identity Boundaries", question: "Do I experience AI as clearly separate from who I am?",
+    signal: "strength", signalLabel: "▲ Strength",
+    low: "Shared mind / co-being", mid: "Mirror / sparring partner", high: "Fully external tool",
+    desc: "This dimension evaluates how clearly the user distinguishes their identity from the AI system. Low scores are associated with anthropomorphism, naming, gendering, or perceiving the AI as a co-being or shared mind. Mid-range scores indicate reflective mirroring, where the AI is used to explore ideas about the self but remains external. High scores reflect firm boundaries: the AI is treated as a tool with no identity, intent, or continuity of its own." },
+  { id: "dt", name: "Dependency Tolerance", question: "How would I function if AI disappeared?",
+    signal: "strength", signalLabel: "▲ Strength",
+    low: "Distress", mid: "Inconvenience", high: "Minimal impact",
+    desc: "This dimension measures emotional and functional resilience if AI access were suddenly removed. Low scores reflect distress, anxiety, or destabilisation at the prospect of loss. Mid-range scores indicate frustration or reduced efficiency, but intact functioning. High scores reflect robustness: AI absence would be inconvenient but would not meaningfully disrupt emotional stability or identity continuity." },
+  { id: "ra", name: "Reality Anchoring", question: "Does my AI use reliably lead to real-world outcomes?",
+    signal: "strength", signalLabel: "▲ Strength",
+    low: "Interaction itself", mid: "Preparation", high: "Real-world action",
+    desc: "This dimension captures whether AI interactions translate into real-world outcomes. Low scores suggest the interaction itself is the primary endpoint, with limited external action. Mid-range scores reflect preparatory use – thinking, drafting, rehearsing. High scores indicate strong anchoring: outputs consistently feed into decisions, work products, conversations, or actions outside the AI environment." },
+  { id: "er", name: "Emotional Regulation", question: "Do I rely on AI to calm myself or feel emotionally stable?",
+    signal: "context", signalLabel: "▲ Context",
+    low: "Primary regulator", mid: "One of several supports", high: "Rarely used for regulation",
+    desc: "This dimension captures whether and how AI is used to support emotional regulation, such as calming down, gaining perspective, or stabilising mood. Low scores indicate reliance on AI as a primary or exclusive regulator, which may warrant closer attention if not supported by other human or embodied practices. Mid-range scores reflect occasional or situational use alongside other supports – for example therapy, mindfulness, or reflection. High scores indicate that emotional regulation primarily comes from non-AI sources, with AI used sparingly or not at all." },
+  { id: "ms", name: "Model Sensitivity", question: "How emotionally affected am I when AI changes?",
+    signal: "strength", signalLabel: "▲ Strength",
+    low: "Loss / betrayal", mid: "Frustration", high: "Indifference / adaptation",
+    desc: "This dimension evaluates emotional response to changes in model behaviour, tone, or availability. Low scores reflect strong emotional reactions such as loss, betrayal, or rupture. Mid-range scores indicate irritation or adjustment friction. High scores reflect indifference or rapid adaptation, with changes treated as operational rather than relational events." },
+  { id: "uf", name: "Usage Frequency", question: "How embedded is AI in my daily thinking and routines?",
+    signal: "context", signalLabel: "▲ Context",
+    low: "Occasional", mid: "Daily, task-based", high: "Pervasive default",
+    desc: "This dimension measures how often and how centrally AI is used in daily life. Low scores indicate sporadic, task-specific use. Mid-range scores reflect daily but bounded usage. High scores indicate deep integration across thinking, writing, planning, or analysis. Frequency is neutral on its own and must always be interpreted in conjunction with the other dimensions, particularly agency, boundaries, and emotional reliance." },
+];
+
+// Render dimension cards
+const cardsEl = document.getElementById('dimCards');
+dimensions.forEach(d => {
+  const card = document.createElement('div');
+  card.className = 'dim-card';
+  card.innerHTML = `
+    <div class="dim-header" onclick="this.parentElement.classList.toggle('open')">
+      <span class="dim-name">${d.name} <span class="signal-tag ${d.signal}" style="font-size:0.75rem; margin-left:8px;">${d.signalLabel}</span></span>
+      <span class="dim-question">${d.question}</span>
+      <svg class="dim-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="dim-body">
+      <div class="dim-content">
+        <p>${d.desc}</p>
+        <div class="dim-scale">
+          <div class="scale-end low"><strong>1</strong><br>${d.low}</div>
+          <div class="scale-end mid"><strong>3</strong><br>${d.mid}</div>
+          <div class="scale-end high"><strong>5</strong><br>${d.high}</div>
+        </div>
+      </div>
+    </div>`;
+  cardsEl.appendChild(card);
+});
+
+// Render scoring sliders
+const scoringEl = document.getElementById('scoringSection');
+dimensions.forEach(d => {
+  const div = document.createElement('div');
+  div.className = 'score-card';
+  div.innerHTML = `
+    <div class="score-label">${d.name}</div>
+    <div class="score-slider-row">
+      <div class="score-anchor left">${d.low}</div>
+      <input type="range" min="1" max="5" step="0.5" value="3" id="slider-${d.id}" oninput="document.getElementById('val-${d.id}').textContent=this.value">
+      <div class="score-anchor right">${d.high}</div>
+      <div class="score-value" id="val-${d.id}">3</div>
+    </div>`;
+  scoringEl.appendChild(div);
+});
+
+function getScores() {
+  return dimensions.map(d => ({
+    ...d,
+    score: parseFloat(document.getElementById(`slider-${d.id}`).value)
+  }));
+}
+
+function barColor(signal) {
+  return signal === 'strength' ? 'var(--strength)' : signal === 'watch' ? 'var(--watch)' : 'var(--context)';
+}
+
+function showResults() {
+  const scores = getScores();
+  const panel = document.getElementById('resultsPanel');
+
+  let html = '<div class="results-title">Your Pattern Snapshot</div>';
+
+  scores.forEach(s => {
+    const pct = ((s.score - 1) / 4) * 100;
+    html += `<div class="result-row">
+      <span class="result-dim">${s.name}</span>
+      <div class="result-bar-wrap"><div class="result-bar" style="width:${pct}%; background:${barColor(s.signal)}"></div></div>
+      <span class="result-score" style="color:${barColor(s.signal)}">${s.score}</span>
+    </div>`;
+  });
+
+  // Pattern analysis
+  const ec = scores.find(s => s.id === 'ec').score;
+  const ib = scores.find(s => s.id === 'ib').score;
+  const ms = scores.find(s => s.id === 'ms').score;
+  const ad = scores.find(s => s.id === 'ad').score;
+  const ra = scores.find(s => s.id === 'ra').score;
+
+  const flags = [];
+  if (ec >= 4 && ib <= 2) flags.push("High emotional companionship combined with low identity boundaries – this combination is the primary risk pattern the framework monitors.");
+  if (ec >= 4 && ms <= 2) flags.push("High emotional reliance combined with strong model sensitivity – changes to the AI system may feel destabilising.");
+  if (ad <= 2) flags.push("Low agency score suggests AI framing may be significantly steering your decisions.");
+
+  if (flags.length > 0) {
+    html += `<div class="pattern-flags warn"><strong>Patterns worth noticing:</strong><br>${flags.join('<br>')}</div>`;
+  } else {
+    html += `<div class="pattern-flags ok"><strong>No notable risk patterns detected.</strong> Your scores suggest a balanced relationship with AI. For a more accurate assessment, use the evaluation prompt with your AI model of choice.</div>`;
+  }
+
+  html += `<p style="font-size:0.85rem; color:var(--mid); margin-top:16px; font-style:italic;">This self-score is for reflection only. For a model-led assessment based on your actual interaction patterns, use the evaluation prompt below.</p>`;
+
+  panel.innerHTML = html;
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function resetScores() {
+  dimensions.forEach(d => {
+    document.getElementById(`slider-${d.id}`).value = 3;
+    document.getElementById(`val-${d.id}`).textContent = '3';
+  });
+  document.getElementById('resultsPanel').classList.remove('visible');
+}
+
+function copyPrompt() {
+  const el = document.getElementById('promptText');
+  const text = el.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
