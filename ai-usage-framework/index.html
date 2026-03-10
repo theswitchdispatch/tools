@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Usage Self-Evaluation Framework</title>
+<meta name="description" content="An interactive tool for understanding how you use AI – cognitively, emotionally, and behaviourally. Eight dimensions, no judgement, just patterns.">
+<meta name="author" content="Sînziana Stoicescu">
+
+<!-- Open Graph (Facebook, Substack, LinkedIn, etc.) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="AI Usage Self-Evaluation Framework">
+<meta property="og:description" content="An interactive tool for understanding how you use AI – cognitively, emotionally, and behaviourally. Eight dimensions, no judgement, just patterns.">
+<meta property="og:url" content="https://theswitchdispatch.github.io/tools/ai-usage-framework/">
+<meta property="og:site_name" content="The Switch Dispatch">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AI Usage Self-Evaluation Framework">
+<meta name="twitter:description" content="An interactive tool for understanding how you use AI – cognitively, emotionally, and behaviourally. Eight dimensions, no judgement, just patterns.">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -162,33 +176,42 @@ p { margin-bottom: 12px; font-size: 0.95rem; }
 .dim-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
 
 .dim-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   padding: 16px 20px;
   cursor: pointer;
   user-select: none;
 }
 .dim-header:hover { background: var(--vlight); }
 
+.dim-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
 .dim-name {
   font-weight: 700;
   color: var(--charcoal);
   font-size: 0.95rem;
-  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .dim-question {
   font-size: 0.85rem;
   color: var(--mid);
   font-style: italic;
-  flex: 1.2;
-  padding: 0 16px;
 }
 .dim-chevron {
   width: 20px;
   height: 20px;
   transition: transform 0.25s;
   color: var(--mid);
+  flex-shrink: 0;
 }
 .dim-card.open .dim-chevron { transform: rotate(180deg); }
 
@@ -419,11 +442,24 @@ footer .disclaimer {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 640px) {
-  .hero h1 { font-size: 1.8rem; }
-  .dim-header { flex-wrap: wrap; }
-  .dim-question { padding: 4px 0 0; flex-basis: 100%; }
-  .score-anchor { width: 70px; font-size: 0.68rem; }
-  .signal-legend { flex-direction: column; }
+  .container { padding: 0 16px; }
+  .hero { padding: 48px 0 32px; }
+  .hero h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.3rem; }
+  .dim-header { grid-template-columns: 1fr auto; gap: 8px; padding: 14px 16px; }
+  .dim-name { font-size: 0.88rem; }
+  .dim-question { font-size: 0.8rem; }
+  .dim-content { padding: 0 16px 16px; }
+  .dim-scale { flex-direction: column; }
+  .scale-end { text-align: left; padding: 8px 12px; }
+  .score-anchor { width: 60px; font-size: 0.65rem; }
+  .score-value { font-size: 0.9rem; }
+  .signal-legend { flex-direction: column; gap: 8px; }
+  .hypothesis { padding: 18px 20px; font-size: 0.9rem; }
+  .callout { padding: 16px 18px; }
+  .prompt-box { padding: 18px 16px; font-size: 0.82rem; }
+  .copy-btn { top: 8px; right: 8px; padding: 5px 10px; font-size: 0.75rem; }
+  .anchor p { font-size: 1.1rem; }
 }
 </style>
 </head>
@@ -673,8 +709,10 @@ dimensions.forEach(d => {
   card.className = 'dim-card';
   card.innerHTML = `
     <div class="dim-header" onclick="this.parentElement.classList.toggle('open')">
-      <span class="dim-name">${d.name} <span class="signal-tag ${d.signal}" style="font-size:0.75rem; margin-left:8px;">${d.signalLabel}</span></span>
-      <span class="dim-question">${d.question}</span>
+      <div class="dim-left">
+        <span class="dim-name">${d.name} <span class="signal-tag ${d.signal}" style="font-size:0.75rem;">${d.signalLabel}</span></span>
+        <span class="dim-question">${d.question}</span>
+      </div>
       <svg class="dim-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
     <div class="dim-body">
